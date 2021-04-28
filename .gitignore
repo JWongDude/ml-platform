@@ -1,0 +1,5 @@
+# Ignore bytecode
+__pycache__/
+
+# Ignore Test Space
+sandbox/
