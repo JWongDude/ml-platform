@@ -3,23 +3,28 @@
 from pathlib import Path
 from PIL import Image
 import torch                                # For tensor manipulation
+from torchvision import transforms          # For pre-processing 
 from torch.nn import functional as F        # For final softmax activation
 
 # ML Models are weights + code! When loading in ckpt, need the model as well.
 from model.pipelines.Image_Classification.model import Model
 
 class Inference(object):
-  def __init__(self, transform, class_mapping):
-    # Store arguments
-    self.transform = transform
+  def __init__(self, class_mapping, params):
     self.class_mapping = class_mapping
+    self.hparams = params
+    self.transform = transforms.Compose([ 
+                      transforms.Resize([self.hparams['length'], self.hparams['width']]),
+                      transforms.ToTensor(),
+                      transforms.Normalize(mean=(0.5, 0.5, 0.5), std=(0.5,0.5,0.5))
+                    ])
 
   def __call__(self, data_path, ckpt_path):
     model = self._load_model(ckpt_path)
     image_dict = self._load_PIL(data_path)
     output = model(image_dict['tensors'])
     labels = self._translate_output(output)
-    return {"images": image_dict['images'], "labels": labels}
+    return {"PIL_Images": image_dict['PIL_Images'], "labels": labels}
 
   # Utilities 
   def _load_model(self, ckpt_path): 

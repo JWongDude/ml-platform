@@ -1,3 +1,10 @@
+# ---- Standard Lib Imports ----
+import os
+import shutil
+from pathlib import Path
+import yaml
+import glob
+
 # ---- External Lib Imports ----
 from argparse import ArgumentParser
 from pytorch_lightning import Trainer
@@ -6,6 +13,8 @@ from pytorch_lightning.loggers import TensorBoardLogger
 
 from PyQt5.QtCore import QObject, pyqtSignal, QThreadPool, QRunnable
 
+from tensorboard import program
+
 # ---- Local Lib Imports ----
 import model.pipelines.Image_Classification as ImageClassification
 import model.utils as utils
@@ -13,15 +22,23 @@ import model.utils as utils
 # progressively import other pipelines
 # import lib provides means import through string arguments
 
-""" ---- Application Data Objects ---- """
+""" ---- Application Macros ----"""
+WEIGHTS_DIRPATH = "model/weights"
+PIPELINES_DIRPATH = "model/pipelines"
+LOGS_DIRPATH = "model/logs"
+IMAGE_CLASSIFICATION_CLASSMAP_FILENAME = "Class Map"
+
+""" ---- Multithreading Objects ----- """
 class WorkerSignals(QObject):
   started = pyqtSignal()
   finished = pyqtSignal()
 
 class Worker(QRunnable):
-  def __init__(self, trainer, model, datamodule):
+  def __init__(self, pipeline, run_name, trainer, model, datamodule):
     super().__init__()
     self.signals = WorkerSignals()
+    self.pipeline = pipeline
+    self.run_name = run_name
     self.trainer = trainer
     self.model = model
     self.datamodule = datamodule
@@ -31,22 +48,16 @@ class Worker(QRunnable):
     self.trainer.fit(self.model, self.datamodule)
     self.signals.finished.emit()
 
-class Active:
-  def __init__(self) -> None:
-    self.thread = None
-    self.worker = None
-    
 threadpool = QThreadPool()
 
 """ ---- Model API: Preprocess Panel ---- """
 
 
 """ ---- Model API: Model Panel ---- """
-def _set_ckpt_callback(pipeline, run_name): 
+def _set_ckpt_callback(output_directory): 
   checkpoint_callback = ModelCheckpoint(
-    dirpath = 'model/weights/' + pipeline,
+    dirpath = output_directory, 
     save_weights_only = True,
-    filename = run_name + '_{epoch:02d}_{val_loss:.2f}',
     monitor = 'val_acc',
     mode = 'max', 
     save_top_k = 1
@@ -54,7 +65,7 @@ def _set_ckpt_callback(pipeline, run_name):
   return checkpoint_callback
 
 def _set_logger(pipeline, run_name):
-  logger = TensorBoardLogger(save_dir='model/logs/' + pipeline, name = run_name)
+  logger = TensorBoardLogger(save_dir='model/logs/', name = pipeline, version = run_name) # Creates a logging directory w/ experiment name
   return logger
 
 def makeTrainingJob(pipeline, run_name, model_input, trainer_input):
@@ -72,33 +83,58 @@ def makeTrainingJob(pipeline, run_name, model_input, trainer_input):
     model_parser = ImageClassification.model.Model.add_model_specific_args(model_parser)
     model_dict = vars(model_parser.parse_args(model_input))
 
-  # Init Trainer 
-  trainer_dict['callbacks'] = [_set_ckpt_callback(pipeline, run_name)]
+  # Init Trainer and output directories of Trainer
+  log_directory = LOGS_DIRPATH + '/' + pipeline + '/' + run_name
+  os.mkdir(log_directory)
   trainer_dict['logger'] = _set_logger(pipeline, run_name)
+  output_directory = WEIGHTS_DIRPATH + '/' + pipeline + '/' + run_name
+  os.mkdir(output_directory)
+  trainer_dict['callbacks'] = [_set_ckpt_callback(output_directory)]
   trainer = Trainer(**trainer_dict)
 
-  # Add Pipeline-Specific Parameters
-  if pipeline == "Image_Classification":
-    # Add number of classes to dictionary
-    model_dict['num_classes'] = utils.numberOfClasses(model_dict['input_dirpath'] + '/' + "train")
+  # Perform Pipeline-Specific Actions:
+  if pipeline == "Image_Classification":  # Comes with Class Map 
+    # Specify number of classes in model and copy the class map to the output directory
+    class_map_path = model_dict['input_dirpath'] + '/' + IMAGE_CLASSIFICATION_CLASSMAP_FILENAME + ".txt"
+    model_dict['num_classes'] = utils.getNumberOfClasses(class_map_path)
+    shutil.copy2(class_map_path, output_directory)
 
   # Init Datamodule and Model
   datamodule = ImageClassification.datamodule.DataModule(model_dict)
   model = ImageClassification.model.Model(model_dict)
 
   # Init Worker
-  worker = Worker(trainer, model, datamodule)
+  worker = Worker(pipeline, run_name, trainer, model, datamodule)
 
   # Return worker to Controller for any view connections
   return worker
 
 # Call after making any view connections
 def startTrainingJob(worker):
+  # Run Training
   threadpool.start(worker)
 
+def endTrainingJob(worker):
+  # Transfer Training Hparams to Output Directory
+  hparams_file = LOGS_DIRPATH + '/' + worker.pipeline + '/' + worker.run_name + '/' + "hparams.yaml"
+  output_directory = WEIGHTS_DIRPATH + '/' + worker.pipeline + '/' + worker.run_name
+  shutil.copy2(hparams_file, output_directory)
+
 """ ---- Model API: Inference Panel ---- """
-def predict(pipeline, data_path, ckpt_path):
+def predict(pipeline, data_dir, ckpt_dir):
+  # Type Safety 
+  data_dir = str(data_dir)
+  ckpt_dir = str(ckpt_dir) 
+
+  # Get Checkpoint File in Checkpoint Path
+  [ckpt_file] = glob.glob(ckpt_dir + '/' + '*.ckpt')
+
   if pipeline == "Image_Classification":
-    classifier = ImageClassification.inference.Inference(transform = datamodule.transform['val'], 
-                                              class_mapping = datamodule.class_mapping)
-    return classifier(data_path, ckpt_path) 
+    # Prepare Inference Inputs
+    class_mapping = utils.getClassMappingFromDirectory(ckpt_dir)
+    with open(Path(ckpt_dir) / 'hparams.yaml') as file:
+      params = yaml.load(file, Loader=yaml.FullLoader)
+
+    # Run Inference
+    classifier = ImageClassification.inference.Inference(class_mapping, params)
+    return classifier(data_dir, ckpt_file) 

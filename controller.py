@@ -4,11 +4,13 @@
 
 # ---- Standard Lib Imports ----
 from pathlib import Path
+import shutil
 from functools import partial
 import shlex
 
 # ---- Local Lib Imports ----
 import model.api
+import model.utils
 import view.api
 from view.api import ui_signals
 
@@ -16,6 +18,7 @@ from view.api import ui_signals
 WEIGHTS_DIRPATH = "model/weights"
 PIPELINES_DIRPATH = "model/pipelines"
 LOGS_DIRPATH = "model/logs"
+IMAGE_CLASSIFICATION_CLASSMAP_FILENAME = "Class Map"
 
 """ ---- Application Data Objects ---- """
 class ModelParameters:
@@ -142,39 +145,44 @@ def setRunName(text):
 
 # Triggered by "Train" Button
 def initializeTraining():
-  if (model_parameters.allTrainingInputsRecieved()):
-    # try:
-      # Format command line input as list of arguments
-      model_input = [model_parameters.data_path] + shlex.split(model_parameters.model_hp)
-      trainer_input = shlex.split(model_parameters.trainer_hp)
-      
-      # TODO: Temporary Print Feedback, remove later
-      print("Model Input:", model_input)
-      print("Trainer Input:", trainer_input)
-
-      # Create Training Job 
-      worker = model.api.makeTrainingJob(model_parameters.pipeline, model_parameters.run_name, model_input, trainer_input)
-      
-      # Connect View Updates 
-      progress_string = f"Running Training Job: {model_parameters.run_name}"
-      worker.signals.started.connect(partial(lambda x: view.api.displayProgressPresentation(x), progress_string))
-      worker.signals.started.connect(view.api.disableTrainButton)
-
-      end_string = f"Training Job finished, saved weights: {model_parameters.run_name}.ckpt"
-      worker.signals.finished.connect(partial(lambda x: view.api.displayProgressPresentation(x), end_string))
-      worker.signals.finished.connect(view.api.enableTrainButton)
-      
-      # Start the Job
-      model.api.startTrainingJob(worker)
-
-    # except Exception as e:
-    #   print(e)
-    #   error_string = "Error: Please provide training data in expected format " + \
-    #   "and provide valid hyperparameters. See the help panel for details."
-    #   view.api.displayTrainingErrorPresentation(error_string=error_string)
-  else:
+  if not model_parameters.allTrainingInputsRecieved():
     error_string="Error: Please specify a data path, pipeline, and weights."
     view.api.displayTrainingErrorPresentation(error_string=error_string)
+
+  elif not model.utils.runNameUnique(model_parameters.run_name):
+    error_string="Error: Please specify a unique experiment name."
+    view.api.displayTrainingErrorPresentation(error_string=error_string)
+
+  else:
+  # try:
+  # Format command line input as list of arguments
+    model_input = [model_parameters.data_path] + shlex.split(model_parameters.model_hp)
+    trainer_input = shlex.split(model_parameters.trainer_hp)
+    
+    # TODO: Temporary Print Feedback, remove later
+    print("Model Input:", model_input)
+    print("Trainer Input:", trainer_input)
+
+    # Create Training Job 
+    worker = model.api.makeTrainingJob(model_parameters.pipeline, model_parameters.run_name, model_input, trainer_input)
+    
+    # Connect View Updates 
+    progress_string = f"Running Training Job: {model_parameters.run_name}"
+    worker.signals.started.connect(partial(lambda x: view.api.displayProgressPresentation(x), progress_string))
+    worker.signals.started.connect(view.api.disableTrainButton)
+    end_string = f"Training Job Finished! Saved Weights: {model_parameters.run_name}"
+    worker.signals.finished.connect(partial(lambda x: model.api.endTrainingJob(x), worker))
+    worker.signals.finished.connect(partial(lambda x: view.api.displayProgressPresentation(x), end_string))
+    worker.signals.finished.connect(view.api.enableTrainButton)
+
+    # Start the Job
+    model.api.startTrainingJob(worker)
+
+  # except Exception as e:
+  #   print(e)
+  #   error_string = "Error: Please provide training data in expected format " + \
+  #   "and provide valid hyperparameters. See the help panel for details."
+  #   view.api.displayTrainingErrorPresentation(error_string=error_string)
 
 def launchDashboard():
   # TODO: Start Tensorboard Process
@@ -196,12 +204,13 @@ def setInferenceWeights(signal):
   inference_parameters.ckpt_path = pipeline_weights[index] 
   # print(inference_parameters.ckpt_path)
 
+# Let's just hope user does not rename to existing filename
 def renameInferenceWeights(signal):
   name, index, updated_name = signal 
   if index != -1:
     weight_directory = list((Path(WEIGHTS_DIRPATH) / name).iterdir())
     weight_path = weight_directory[index]
-    updated_path = Path(weight_path.parent, f"{updated_name}{weight_path.suffix}") 
+    updated_path = Path(weight_path.parent, f"{updated_name}") 
     # Check if we are renaming the active weights
     if weight_path == inference_parameters.ckpt_path:
       inference_parameters.ckpt_path = updated_path
@@ -215,7 +224,7 @@ def deleteInferenceWeights(signal):
   # Check if we are deleting the active weights
   if weight_path == inference_parameters:
     inference_parameters.ckpt_path = None
-  weight_path.unlink()
+  shutil.rmtree(weight_path)
   # print("Updated State: ", inference_parameters.ckpt_path)
 
 # Triggered by Refresh Button, also called on application initialization
@@ -229,7 +238,7 @@ def refreshInferenceWeights():
 # Triggered by "Inference" Button
 def initializeInference():
   if inference_parameters.allInferenceInputsRecieved():
-    try: 
+    # try: 
       # Get Prediction 
       predictions = model.api.predict(inference_parameters.pipeline, inference_parameters.data_path, inference_parameters.ckpt_path)
       inference_parameters.predicted_labels = predictions['labels']
@@ -262,10 +271,10 @@ def initializeInference():
       view.api.presentInferenceView(image_path, label, slider_max)
       # FUTURE: Add Index / Label Search Functionality for quick navigation. 
       """
-    except: 
-      error_string = "Error: Please provide test data in expected format. " + \
-      "See the help panel for details."
-      view.api.displayInferenceErrorPresentation(error_string=error_string)
+    # except: 
+    #   error_string = "Error: Please provide test data in expected format. " + \
+    #   "See the help panel for details."
+    #   view.api.displayInferenceErrorPresentation(error_string=error_string)
   else:
     error_string="Error: Please specify a data path, pipeline, and weights."
     view.api.displayInferenceErrorPresentation(error_string=error_string)
@@ -283,10 +292,10 @@ TODO log:
 - Testing model/inference logic. We know it works, just see if its integrated in. 
 (So we will do this by uploading this code to colab calling the control functions in a script. Comment out anything pyqt.)
 
-- More informative error messages
-- Tensorboard Subprocess
-- Packaging the model and view logic into proper packages.
-- Pushing the working code to git. 
+- Tensorboard Subprocess, modifying the weights/logs will modify the other.
+This is easily achieved by routing the signals to one another. 
+
+- Convert Class Map text file to read yaml file.
 - Quality of Life Updates
 - Integrate Dakota's code
 
