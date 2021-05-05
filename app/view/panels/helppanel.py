@@ -12,7 +12,7 @@ from PyQt5.QtCore import (Qt, QSize)
 from PyQt5.QtGui import (QIcon, QFont)
 
 # ---- Local Lib Imports ----
-import view.widgets as widgets
+import app.view.widgets as widgets
 
 class HelpView(QFrame):
   def __init__(self):

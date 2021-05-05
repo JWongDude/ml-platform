@@ -9,15 +9,15 @@ from functools import partial
 import shlex
 
 # ---- Local Lib Imports ----
-import model.api
-import model.utils
-import view.api
-from view.api import ui_signals
+import app.model.api as model_api
+import app.model.utils as model_utils
+import app.view.api as view_api
+from app.view.api import ui_signals
 
 """ ---- Application Macros ----"""
-WEIGHTS_DIRPATH = "model/weights"
-PIPELINES_DIRPATH = "model/pipelines"
-LOGS_DIRPATH = "model/logs"
+WEIGHTS_DIRPATH = "app/model/weights"
+PIPELINES_DIRPATH = "app/model/pipelines"
+LOGS_DIRPATH = "app/model/logs"
 IMAGE_CLASSIFICATION_CLASSMAP_FILENAME = "Class Map"
 
 """ ---- Application Data Objects ---- """
@@ -70,6 +70,7 @@ def loadApplication():
   # Custom Models take the same format as Models, but stored in seperate directory
   # Build up "pipeline_database"
   
+  # Load in YAML application config file
   pass
 
 def recoverApplicationState():
@@ -147,11 +148,11 @@ def setRunName(text):
 def initializeTraining():
   if not model_parameters.allTrainingInputsRecieved():
     error_string="Error: Please specify a data path, pipeline, and weights."
-    view.api.displayTrainingErrorPresentation(error_string=error_string)
+    view_api.displayTrainingErrorPresentation(error_string=error_string)
 
-  elif not model.utils.runNameUnique(model_parameters.run_name):
+  elif not model_utils.runNameUnique(model_parameters.run_name):
     error_string="Error: Please specify a unique experiment name."
-    view.api.displayTrainingErrorPresentation(error_string=error_string)
+    view_api.displayTrainingErrorPresentation(error_string=error_string)
 
   else:
     try:
@@ -164,27 +165,27 @@ def initializeTraining():
       print("Trainer Input:", trainer_input)
 
       # Create Training Job 
-      worker = model.api.makeTrainingJob(model_parameters.pipeline, model_parameters.run_name, model_input, trainer_input)
+      worker = model_api.makeTrainingJob(model_parameters.pipeline, model_parameters.run_name, model_input, trainer_input)
       
       # Connect View Updates 
       progress_string = f"Running Training Job: {model_parameters.run_name}"
-      worker.signals.started.connect(partial(lambda x: view.api.displayProgressPresentation(x), progress_string))
-      worker.signals.started.connect(view.api.disableTrainButton)
+      worker.signals.started.connect(partial(lambda x: view_api.displayProgressPresentation(x), progress_string))
+      worker.signals.started.connect(view_api.disableTrainButton)
       end_string = f"Training Job Finished! Saved Weights: {model_parameters.run_name}"
-      worker.signals.finished.connect(partial(lambda x: model.api.endTrainingJob(x), worker))
-      worker.signals.finished.connect(partial(lambda x: view.api.displayProgressPresentation(x), end_string))
-      worker.signals.finished.connect(view.api.enableTrainButton)
+      worker.signals.finished.connect(partial(lambda x: model_api.endTrainingJob(x), worker))
+      worker.signals.finished.connect(partial(lambda x: view_api.displayProgressPresentation(x), end_string))
+      worker.signals.finished.connect(view_api.enableTrainButton)
 
       # Start the Job
-      model.api.startTrainingJob(worker)
+      model_api.startTrainingJob(worker)
 
     except:
       error_string = "Error: Please provide training data in expected format " + \
       "and provide valid hyperparameters. See the help panel for details."
-      view.api.displayTrainingErrorPresentation(error_string=error_string)
+      view_api.displayTrainingErrorPresentation(error_string=error_string)
 
 def launchDashboard():
-  model.api.launchTensorboard()
+  model_api.launchTensorboard()
 
 """ ---- Control API: Inference Panel ---- """
 # Triggered by Upload Inference Data Button
@@ -231,37 +232,37 @@ def refreshInferenceWeights():
   for dirpath in Path(WEIGHTS_DIRPATH).iterdir(): 
     pipeline = dirpath.name
     weight_names = [path.stem for path in Path(dirpath).iterdir()]
-    view.api.refreshInferenceWeights(pipeline, weight_names)
+    view_api.refreshInferenceWeights(pipeline, weight_names)
 
 # Triggered by "Inference" Button
 def initializeInference():
   if not inference_parameters.allInferenceInputsRecieved():
     error_string="Error: Please specify a data path, pipeline, and weights."
-    view.api.displayInferenceErrorPresentation(error_string=error_string)
+    view_api.displayInferenceErrorPresentation(error_string=error_string)
   else:
     try: 
       # TODO: Add Index / Label Search Functionality for quick navigation. 
       # Get Prediction 
-      predictions = model.api.predict(inference_parameters.pipeline, inference_parameters.data_path, inference_parameters.ckpt_path)
+      predictions = model_api.predict(inference_parameters.pipeline, inference_parameters.data_path, inference_parameters.ckpt_path)
       inference_parameters.predicted_labels = predictions['labels']
 
       # Display First Image to View
       slider_max = inference_parameters.getImageDirectoryLength()
       image_path = inference_parameters.image_directory[0]
       label = inference_parameters.predicted_labels[0]
-      view.api.presentInferenceView(image_path, label, slider_max)
+      view_api.presentInferenceView(image_path, label, slider_max)
       
     except: 
       error_string = "Error: Please provide test data in expected format. " + \
       "See the help panel for details."
-      view.api.displayInferenceErrorPresentation(error_string=error_string)    
+      view_api.displayInferenceErrorPresentation(error_string=error_string)    
 
 """ ---- Control API: Inference Dialog ---- """
 # Triggered by Slider 
 def toggleInference(index):
   image_path = inference_parameters.image_directory[index]
   label = inference_parameters.predicted_labels[index]
-  view.api.updateInferenceView(image_path, label)
+  view_api.updateInferenceView(image_path, label)
 
 
 """

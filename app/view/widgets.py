@@ -16,7 +16,7 @@ from PyQt5.QtCore import (Qt, QSize, pyqtSignal)
 from PyQt5.QtGui import (QIcon, QFont, QPixmap)
 
 # ---- Local Lib Imports ----
-import view.api as view_api
+import app.view.api as view_api
 
 """ ---- Widget Library: Style / Conventions ---- """
 """ Widget library defines set of widget 

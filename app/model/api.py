@@ -16,8 +16,8 @@ from PyQt5.QtCore import QObject, pyqtSignal, QThreadPool, QRunnable
 from tensorboard import program
 
 # ---- Local Lib Imports ----
-import model.pipelines.Image_Classification as ImageClassification
-import model.utils as utils
+import app.model.pipelines.Image_Classification as ImageClassification
+import app.model.utils as utils
 
 # progressively import other pipelines
 # import lib provides means import through string arguments

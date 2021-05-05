@@ -3,3 +3,6 @@ __pycache__/
 
 # Ignore Test Space
 sandbox/
+
+# Ignore Any Weight/Logging Files
+Experiment *

@@ -4,7 +4,7 @@ from PyQt5.QtWidgets import(
 )
 
 # ---- Local Lib Imports ----
-from view.widgets import (HSeperationLine, LineEditLayout, Button, TextBox, 
+from app.view.widgets import (HSeperationLine, LineEditLayout, Button, TextBox, 
   UploadWidget, Selector, Heading, Spacer 
 )
 

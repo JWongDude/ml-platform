@@ -9,10 +9,10 @@ from PyQt5.QtCore import (Qt, QSize)
 from PyQt5.QtGui import (QIcon)
 
 # ---- Local Lib Imports ----
-import view.icon_resources
-from view.panels.modelpanel import ModelView
-from view.panels.inferencepanel import InferenceView
-from view.panels.helppanel import HelpView
+import app.view.icon_resources
+from app.view.panels.modelpanel import ModelView
+from app.view.panels.inferencepanel import InferenceView
+from app.view.panels.helppanel import HelpView
 
 class PlatformUi(QMainWindow):
   def __init__(self):

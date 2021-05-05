@@ -1,9 +1,9 @@
 from pathlib import Path
 
 """ ---- Application Macros ----"""
-WEIGHTS_DIRPATH = "model/weights"
-PIPELINES_DIRPATH = "model/pipelines"
-LOGS_DIRPATH = "model/logs"
+WEIGHTS_DIRPATH = "app/model/weights"
+PIPELINES_DIRPATH = "app/model/pipelines"
+LOGS_DIRPATH = "app/model/logs"
 IMAGE_CLASSIFICATION_CLASSMAP_FILENAME = "Class Map"
 
 def getNumberOfClasses(map_filepath):

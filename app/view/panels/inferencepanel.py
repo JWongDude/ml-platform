@@ -3,10 +3,10 @@ from PyQt5.QtWidgets import(
   QFrame, QSpacerItem, QSizePolicy, QHBoxLayout, QVBoxLayout)
 
 # ---- Local Lib Imports ----
-from view.widgets import (Dialog, Heading, HSeperationLine, ListWidget, 
+from app.view.widgets import (Dialog, Heading, HSeperationLine, ListWidget, 
   Selector, Button, UploadWidget, Image, Slider, LineEditLayout, TextBox, ListWidgetSelector
 )
-import view.api as view_api
+import app.view.api as view_api
 
 """ --- Custom Inference Panel Widgets --- """
 class WeightPanel(QFrame):
