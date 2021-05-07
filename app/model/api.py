@@ -14,12 +14,13 @@ from pytorch_lightning.loggers import TensorBoardLogger
 
 from PyQt5.QtCore import QObject, pyqtSignal, QThreadPool, QRunnable
 
+import tensorboard
 from tensorboard import program
 import threading
 
 # ---- Local Lib Imports ----
 import app.model.pipelines.Image_Classification as ImageClassification
-import app.model.utils as utils
+import app.utils as utils
 
 # progressively import other pipelines
 # import lib provides means import through string arguments

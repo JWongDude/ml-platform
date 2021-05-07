@@ -10,7 +10,7 @@ import shlex
 
 # ---- Local Lib Imports ----
 import app.model.api as model_api
-import app.model.utils as model_utils
+import app.utils as utils
 import app.view.api as view_api
 from app.view.api import ui_signals
 
@@ -48,9 +48,12 @@ class InferenceParameters:
     self.data_path = None
     self.pipeline = "Image_Classification" 
     self.ckpt_path = None
-    # Inference Output 
+    # Inference Output
+    self.dir_hash = None  # For caching vs. no caching 
     self.image_directory = []   # Directory of Image Path Objects
     self.predicted_labels = []  # Directory of Labels
+    # Inference Dialog
+    self.slider_index = 0
 
   def getImageDirectoryLength(self):
     return len(self.image_directory)
@@ -153,10 +156,10 @@ def setRunName(text):
 # Triggered by "Train" Button
 def initializeTraining():
   if not model_parameters.allTrainingInputsRecieved():
-    error_string="Error: Please specify a data path, pipeline, and weights."
+    error_string="Error: Please provide training data."
     view_api.displayTrainingErrorPresentation(error_string=error_string)
 
-  elif not model_utils.runNameUnique(model_parameters.run_name):
+  elif not utils.runNameUnique(model_parameters.run_name):
     error_string="Error: Please specify a unique experiment name."
     view_api.displayTrainingErrorPresentation(error_string=error_string)
 
@@ -243,28 +246,46 @@ def refreshInferenceWeights():
 # Triggered by "Inference" Button
 def initializeInference():
   if not inference_parameters.allInferenceInputsRecieved():
-    error_string="Error: Please specify a data path, pipeline, and weights."
+    error_string="Error: Please provide an image directory and selected a trained model."
     view_api.displayInferenceErrorPresentation(error_string=error_string)
   else:
-    # try: 
-      # TODO: Add Index / Label Search Functionality for quick navigation. 
-      # Get Prediction 
-      predictions = model_api.predict(inference_parameters.pipeline, inference_parameters.data_path, inference_parameters.ckpt_path)
-      inference_parameters.predicted_labels = predictions['labels']
+    try: 
+      # Calculate Directory hash for caching
+      md5_hash = utils.md5_dir(inference_parameters.data_path)
+      # Set hash and predictions for first input directory and any new/modified input directories
+      if inference_parameters.dir_hash is None or inference_parameters.dir_hash != md5_hash:  
+        inference_parameters.dir_hash = md5_hash
+        setInferenceData(inference_parameters.data_path)
+        predictions = model_api.predict(inference_parameters.pipeline, inference_parameters.data_path, inference_parameters.ckpt_path)
+        inference_parameters.predicted_labels = predictions['labels']
 
-      # Display First Image to View
-      slider_max = inference_parameters.getImageDirectoryLength()
-      image_path = inference_parameters.image_directory[0]
-      label = inference_parameters.predicted_labels[0]
-      view_api.presentInferenceView(image_path, label, slider_max)
+        # Initialize View w/ index = 0
+        slider_max = inference_parameters.getImageDirectoryLength()
+        image_path = inference_parameters.image_directory[0]
+        label = inference_parameters.predicted_labels[0]
+        view_api.presentInferenceView(image_path, label, slider_max)
+
+      # Otherwise, hashes are equal. Use previously computed predictions
+      else:
+        # Initialize View w/ last index
+        slider_max = inference_parameters.getImageDirectoryLength()
+        image_path = inference_parameters.image_directory[inference_parameters.slider_index]
+        label = inference_parameters.predicted_labels[inference_parameters.slider_index]
+        view_api.presentInferenceView(image_path, label, slider_max)
+
+      # Clear any error string
+      view_api.displayInferenceErrorPresentation(error_string="")
+
+      # TODO: Add Index / Label Search Functionality for quick navigation. 
       
-    # except:
-    #   error_string = "Error: Please provide test data as plain image directory. "
-    #   view_api.displayInferenceErrorPresentation(error_string=error_string)    
+    except:
+      error_string = "Error: Please provide test data as plain image directory. "
+      view_api.displayInferenceErrorPresentation(error_string=error_string)    
 
 """ ---- Control API: Inference Dialog ---- """
 # Triggered by Slider 
 def toggleInference(index):
+  inference_parameters.slider_index = index
   image_path = inference_parameters.image_directory[index]
   label = inference_parameters.predicted_labels[index]
   view_api.updateInferenceView(image_path, label)
