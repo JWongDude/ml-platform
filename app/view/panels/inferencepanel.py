@@ -82,10 +82,6 @@ class InferenceDialog(Dialog):
     self.image.updateImage(image_path)
     self.label.updateEditText(label)
 
-# A few things to add: 
-# Ideally, 
-
-
 class InferenceLaunchpad(QFrame):
   def __init__(self):
     super().__init__()

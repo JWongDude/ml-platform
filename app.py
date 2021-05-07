@@ -5,15 +5,13 @@ import sys
 from PyQt5.QtWidgets import QApplication
 import app.view.ui as ui
 import app.controller as controller
-import app.view.api as view_api
 
 # Temp main function 
 def main():
     # Init Event Loop 
     app = QApplication([])
     app.setStyle('Breeze')
-    view_api.add_to_signal_map(app.aboutToQuit, "close_signal")
-
+    
     # Init View
     view = ui.PlatformUi()
 
@@ -33,11 +31,21 @@ if __name__ == '__main__':
     main()
 
 
+# Def make logging view so that user is able to delete logs.
+# Is it a good idea to delete logs and weight together? Yes.
+# Is it a good idea to delete from two places? Yes. 
+# It's not bad at all. Make 
+
 # TODO:
-# Do the other quality of life: 
-# - Make Dakota's Panel 
-# - Tensorboard Subprocess, modifying the weights/logs will modify the other.
+# 1) Develop Logger, modifying the weights/logs will modify the other.
 # This is easily achieved by routing the signals to one another.
 
+# 1a) Move the logs/weights to artifacts folder, I have more confidence I can figure out relative imports
+
+# 2) Develop Explorer
 # - Enlarge Inference Images 
-# - Register Main Window Close signal and rig to close Tensorboard thread and Inference Window. 
+
+# --------------------------------
+# 3) Make Object Detection Model
+
+# 4) Make Dakota's Panel 

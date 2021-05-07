@@ -109,6 +109,11 @@ def connectMainWindowSignals():
   connect(ui_signals['train_button'], initializeTraining) 
   connect(ui_signals['dash_button'], launchDashboard)
   
+  # Add more connections for renameLog, deletingLog, and refreshLogs
+  # First create the dialog, then make the connections/methods. Methods are variations of existing methods and 
+  # connections wil cross connect. 
+  # Finally, test the log directory. 
+
   # Inference Panel Signals
   connect(ui_signals['inference_dirpath'], setInferenceData)
   connect(ui_signals['weight_selection'], setInferenceWeights)

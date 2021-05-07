@@ -20,10 +20,10 @@ import threading
 
 # ---- Local Lib Imports ----
 import app.model.pipelines.Image_Classification as ImageClassification
-import app.utils as utils
-
 # progressively import other pipelines
 # import lib provides means import through string arguments
+
+import app.utils as utils
 
 """ ---- Application Macros ----"""
 WEIGHTS_DIRPATH = "app/model/weights"
@@ -131,6 +131,7 @@ def endTrainingJob(worker):
 
 def launchTensorboard():
   tensorboard_thread = threading.Thread(target=runTb)
+  tensorboard_thread.daemon = True
   tensorboard_thread.start()
   print("Loading Tensorboard...")
 

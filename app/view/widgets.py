@@ -246,6 +246,8 @@ class Selector(QFrame):
   def getCurrentWidget(self):
     return self.widget_map[self.combobox.currentText()]
 
+# Encapsulates the view logic, all you need to worry about 
+# is how to init and the signals it emits. 
 class ListWidgetSelector(QFrame):
   selection = pyqtSignal(tuple) #2-ple: (name, index)
   renamedFile = pyqtSignal(tuple) # 3-ple: (name, index, updated_name)

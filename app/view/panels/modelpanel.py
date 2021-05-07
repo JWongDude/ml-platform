@@ -1,11 +1,12 @@
 # ---- External Lib Imports ----
+from typing import Text
 from PyQt5.QtWidgets import(
   QFrame, QHBoxLayout, QVBoxLayout
 )
 
 # ---- Local Lib Imports ----
-from app.view.widgets import (HSeperationLine, LineEditLayout, Button, TextBox, 
-  UploadWidget, Selector, Heading, Spacer 
+from app.view.widgets import (HSeperationLine, LineEditLayout, Button, ListWidgetSelector, TextBox, 
+  UploadWidget, Selector, Heading, Spacer, Dialog
 )
 
 """ --- Custom Model Panel Widgets --- """
@@ -49,15 +50,39 @@ class HyperparameterEdit(QFrame):
     layout.addLayout(trainerHpLayout)
     self.setLayout(layout)
 
+class LogDirectory(Dialog):
+  def __init__(self) -> None:
+      super().__init__("Log Directory")
+      # Init Widgets
+      self.select_names = ["Image_Classification", "Object_Detection", "Image_Segmentation"]
+      self.list_widget = ListWidgetSelector(self.select_names) # Add signal/update keys
+      self.refresh_button = Button() # Add signal key
+      self.refresh_button.setText("Refresh")
+
+      # Layout 
+      layout = QVBoxLayout()
+      header = QHBoxLayout()
+      header.addWidget(Heading("Log Directory"))
+      header.addItem(Spacer(height=20))
+      header.addWidget(self.refresh_button)
+      layout.addLayout(header)
+      layout.addWidget(self.list_widget)
+      self.setLayout(layout)
+
 class ButtonPanel(QFrame):
   def __init__(self):
     super().__init__()
-    # Init Buttons
+    # Init Buttons, Log Directory Popup
     train_button = Button(signal_key="train_button", update_key="update_train_button")
     train_button.setText("Train")
     dash_button = Button(signal_key="dash_button")
     dash_button.setText("Open Dashboard")
+    self.log_directory = LogDirectory()
 
+    # Connect Button to Log Directory
+    dash_button.clicked.connect(self.log_directory.run_dialog)
+
+    # Layout
     layout = QHBoxLayout()
     layout.addWidget(train_button)
     layout.addWidget(dash_button)
