@@ -7,7 +7,7 @@ from torchvision import transforms          # For pre-processing
 from torch.nn import functional as F        # For final softmax activation
 
 # ML Models are weights + code! When loading in ckpt, need the model as well.
-from app.model.pipelines.Image_Classification.model import Model
+from .model import Model
 
 class Inference(object):
   def __init__(self, class_mapping, params):

@@ -9,10 +9,33 @@ from app.view.widgets import (HSeperationLine, LineEditLayout, Button, TextBox,
 )
 
 """ --- Custom Model Panel Widgets --- """
+class ModelText(QFrame):
+  def __init__(self, modelHp=None, trainerHp=None):
+    super().__init__()
+    # Init Widgets
+    self.model_header = Heading("Default Model Hyperparameters", 8, underline=True)
+    self.model_hp = TextBox(modelHp)
+    self.trainer_header = Heading("Default Trainer Hyperparameters", 8, underline=True)
+    self.trainer_hp = TextBox(trainerHp)
+
+    # Layout
+    layout = QHBoxLayout()
+    left = QVBoxLayout()
+    left.addWidget(self.model_header)
+    left.addWidget(self.model_hp)
+    layout.addLayout(left)
+    right = QVBoxLayout()
+    right.addWidget(self.trainer_header)
+    right.addWidget(self.trainer_hp)
+    layout.addLayout(right)
+    self.setLayout(layout)
+
 class HyperparameterEdit(QFrame):
   def __init__(self):
     super().__init__()
-    # Line Edits for Hyperparameter Tuning
+    # Init Widgets
+    text = TextBox("To override the default hyperparameters, please provide a sequence of flags.")
+    example = TextBox("Ex: --batch_size 64 --lr 1e-5\n")
     modelHpLayout = LineEditLayout(label_text="Model Hyperparameters:   ", 
                                           edit_text="", signal_key="modelHp")
     trainerHpLayout= LineEditLayout(label_text="Trainer Hyperparameters: ", 
@@ -20,6 +43,8 @@ class HyperparameterEdit(QFrame):
 
     # Layout
     layout = QVBoxLayout()
+    layout.addWidget(text)
+    layout.addWidget(example)
     layout.addLayout(modelHpLayout)
     layout.addLayout(trainerHpLayout)
     self.setLayout(layout)
@@ -61,24 +86,36 @@ class ModelView(QFrame):
 
     # Build Custom Widgets:
     upload_widget = UploadWidget(signal_key="train_dirpath")
-    widget_map = {"Image_Classification": TextBox("\nLorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum. \n \n"),
-                  "Object_Detection": TextBox("--- Object Detection Description Here ---"),
-                  "Image_Segmentation": TextBox("--- Image Segmentation Description Here ---")}
+
+    self.ic = ModelText(modelHp="--length 224           --width 224 \n" +
+                                "--batch_size 32       --num_workers 2 \n" +
+                                "--lr 1e-3 ",
+                       trainerHp="--gpus 0           --max_epochs 10\n \n")
+
+    self.od = ModelText(modelHp="--one \n--two\n--three", trainerHp="--four\n --five\n --six")
+    self.iseg = ModelText(modelHp="--one \n--two\n--three", trainerHp="--four\n --five\n --six")
+
+    widget_map = {"Image_Classification": self.ic,
+                  "Object_Detection": self.od,
+                  "Image_Segmentation": self.iseg}
     model_selector = Selector(widget_map, signal_key="train_pipeline")
     hp_edit = HyperparameterEdit()
     runner = Runner()
 
+    # Layout
     layout = QVBoxLayout()
-    layout.addWidget(Heading(' Model Training', 20))
+    layout.addWidget(Heading(' Model Training', font_size=20))
     layout.addWidget(HSeperationLine())
-    layout.addWidget(Heading(' Upload Training Data', 12))
+    layout.addWidget(Heading(' 1) Upload Training Data', font_size=12))
     layout.addWidget(upload_widget)
     layout.addWidget(HSeperationLine())
-    layout.addWidget(Heading(' Select Pipeline', 12))
+    layout.addWidget(Heading(' 2) Select Model Type', font_size=12))
     layout.addWidget(model_selector)
+    layout.addWidget(HSeperationLine())
+    layout.addWidget(Heading(' Optional: Modify Hyperparameters', font_size=12))
     layout.addWidget(hp_edit)
     layout.addWidget(HSeperationLine())
-    layout.addWidget(Heading(' Submit Training Run', 12))
+    layout.addWidget(Heading(' 3) Submit Training Run', font_size=12))
     layout.addWidget(runner)
-    layout.addItem(Spacer(20, 120))
+    layout.addItem(Spacer(20, 180))
     self.setLayout(layout)

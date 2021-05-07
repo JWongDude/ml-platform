@@ -52,16 +52,20 @@ class HSeperationLine(QFrame):
     self.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Minimum)
 
 class Heading(QLabel):
-  def __init__(self, text, font_size):
+  def __init__(self, text, font_size=12, underline=False):
     super().__init__()
     self.setText(text)
-    self.setFont(QFont('Roboto', font_size))
+    self.font = QFont('Roboto', font_size)
+    if underline:
+      self.font.setUnderline(True)
+    self.setFont(self.font)
     
 class TextBox(QLabel):
   def __init__(self, label_string, font_size=8, wordWrap=True, update_key=None):
     super().__init__()
     self.setText(label_string)
-    self.setFont(QFont('Roboto', font_size))
+    self.font = QFont('Roboto', font_size)
+    self.setFont(self.font)
     self.setWordWrap(wordWrap)
     if update_key is not None:
       view_api.add_to_update_map(self.updateTextBox, update_key)
@@ -149,15 +153,13 @@ class Image(QLabel):
     pixmap = QPixmap(image_path)
     self.setPixmap(pixmap)
 
-class Dialog(QDialog): #Replace with QFrame
-  def __init__(self, window_title): # Add a Close Signal
+class Dialog(QFrame): 
+  def __init__(self, window_title):
     super().__init__()
     self.setWindowTitle(window_title)
-    # Close on close signal (typically the main window)
-    # close_signal.connect(lambda: self.close())
 
   def run_dialog(self):
-    self.exec_()  # Replace with .show()
+    self.show()
 
 """ --- Widget Composites --- """
 class UploadWidget(QFrame):

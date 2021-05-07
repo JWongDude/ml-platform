@@ -17,7 +17,7 @@ class WeightPanel(QFrame):
                                                           update_key="update_weight_list")
     self.button = Button(signal_key="refresh_weights")
     self.button.setText("Refresh")
-    self.feedback = TextBox("", wordWrap=False)
+    self.feedback = TextBox("", wordWrap=False, update_key="update_weight_panel_feedback")
     self.file = ""
 
     # Footer Layout
@@ -82,6 +82,10 @@ class InferenceDialog(Dialog):
     self.image.updateImage(image_path)
     self.label.updateEditText(label)
 
+# A few things to add: 
+# Ideally, 
+
+
 class InferenceLaunchpad(QFrame):
   def __init__(self):
     super().__init__()
@@ -110,7 +114,7 @@ class InferenceLaunchpad(QFrame):
   def initAndlaunchDialog(self, image_path, label, slider_max): 
     self.dialog.updateDialog(image_path, label)
     self.dialog.setSliderLength(slider_max)
-    self.dialog.exec_()
+    self.dialog.run_dialog()
 
 class InferenceView(QFrame):
   def __init__(self):
@@ -125,15 +129,15 @@ class InferenceView(QFrame):
 
     # Layout
     layout = QVBoxLayout()
-    layout.addWidget(Heading(" Model Inference", 20))
+    layout.addWidget(Heading(" Model Prediction", font_size=20))
     layout.addWidget(HSeperationLine())
-    layout.addWidget(Heading(" Upload Inference Data", 12))
+    layout.addWidget(Heading(" 1) Upload Image Directory", font_size=12))
     layout.addWidget(upload_widget)
     layout.addWidget(HSeperationLine())
-    layout.addWidget(Heading(' Select Pipeline Weights', 12))
+    layout.addWidget(Heading(' 2) Select Trained Model', font_size=12))
     layout.addWidget(weight_panel)
     layout.addWidget(HSeperationLine())
-    layout.addWidget(Heading(' Launch Inference', 12))
+    layout.addWidget(Heading(' 3) View Model Results', font_size=12))
     layout.addWidget(inference_launchpad)
-    layout.addItem(QSpacerItem(20, 120, QSizePolicy.Preferred, QSizePolicy.Expanding))
+    layout.addItem(QSpacerItem(20, 150, QSizePolicy.Preferred, QSizePolicy.Expanding))
     self.setLayout(layout)

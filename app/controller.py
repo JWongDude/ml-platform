@@ -48,7 +48,7 @@ class InferenceParameters:
     self.data_path = None
     self.pipeline = "Image_Classification" 
     self.ckpt_path = None
-    # Inference Output
+    # Inference Output 
     self.image_directory = []   # Directory of Image Path Objects
     self.predicted_labels = []  # Directory of Labels
 
@@ -77,6 +77,12 @@ def recoverApplicationState():
   # Load in pickled data objects -> application data objects
   # Call view api to display corresponding fields
   
+  # TODO: Autosave applicaiton state
+  # Quality of Life Inference View Startup Feedback 
+  if inference_parameters.ckpt_path == None:
+    feedback_string = "No models trained yet! Visit Model Training to train your first model."
+    view_api.refreshInferenceWeightFeedback(feedback_string)
+
   # Also, parse weight directories to rended those to screen:
   refreshInferenceWeights()
 
@@ -181,7 +187,7 @@ def initializeTraining():
 
     except:
       error_string = "Error: Please provide training data in expected format " + \
-      "and provide valid hyperparameters. See the help panel for details."
+      "and provide valid hyperparameters."
       view_api.displayTrainingErrorPresentation(error_string=error_string)
 
 def launchDashboard():
@@ -240,7 +246,7 @@ def initializeInference():
     error_string="Error: Please specify a data path, pipeline, and weights."
     view_api.displayInferenceErrorPresentation(error_string=error_string)
   else:
-    try: 
+    # try: 
       # TODO: Add Index / Label Search Functionality for quick navigation. 
       # Get Prediction 
       predictions = model_api.predict(inference_parameters.pipeline, inference_parameters.data_path, inference_parameters.ckpt_path)
@@ -252,10 +258,9 @@ def initializeInference():
       label = inference_parameters.predicted_labels[0]
       view_api.presentInferenceView(image_path, label, slider_max)
       
-    except: 
-      error_string = "Error: Please provide test data in expected format. " + \
-      "See the help panel for details."
-      view_api.displayInferenceErrorPresentation(error_string=error_string)    
+    # except:
+    #   error_string = "Error: Please provide test data as plain image directory. "
+    #   view_api.displayInferenceErrorPresentation(error_string=error_string)    
 
 """ ---- Control API: Inference Dialog ---- """
 # Triggered by Slider 
@@ -263,16 +268,3 @@ def toggleInference(index):
   image_path = inference_parameters.image_directory[index]
   label = inference_parameters.predicted_labels[index]
   view_api.updateInferenceView(image_path, label)
-
-
-"""
-TODO log:
-- Tensorboard Subprocess, modifying the weights/logs will modify the other.
-This is easily achieved by routing the signals to one another. 
-- Start new envirnoment as last try.
-- Otherwise, user can open terminal themselves.
-
-- Quality of Life Updates
-- Integrate Dakota's code
-
-"""

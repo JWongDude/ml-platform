@@ -43,6 +43,9 @@ def enableTrainButton():
 def refreshInferenceWeights(pipeline, weight_names):
   ui_updates['update_weight_list'](pipeline, weight_names)
 
+def refreshInferenceWeightFeedback(feedback_string):
+  ui_updates['update_weight_panel_feedback'](feedback_string)
+
 def displayInferenceErrorPresentation(error_string):
   ui_updates['update_inference_feedback'](error_string)
 

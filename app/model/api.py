@@ -2,6 +2,7 @@
 import os
 import shutil
 from pathlib import Path
+import tensorboard
 import yaml
 import glob
 
@@ -14,6 +15,7 @@ from pytorch_lightning.loggers import TensorBoardLogger
 from PyQt5.QtCore import QObject, pyqtSignal, QThreadPool, QRunnable
 
 from tensorboard import program
+import threading
 
 # ---- Local Lib Imports ----
 import app.model.pipelines.Image_Classification as ImageClassification
@@ -23,9 +25,9 @@ import app.model.utils as utils
 # import lib provides means import through string arguments
 
 """ ---- Application Macros ----"""
-WEIGHTS_DIRPATH = "model/weights"
-PIPELINES_DIRPATH = "model/pipelines"
-LOGS_DIRPATH = "model/logs"
+WEIGHTS_DIRPATH = "app/model/weights"
+PIPELINES_DIRPATH = "app/model/pipelines"
+LOGS_DIRPATH = "app/model/logs"
 IMAGE_CLASSIFICATION_CLASSMAP_FILENAME = "Class Map"
 
 """ ---- Multithreading Objects ----- """
@@ -49,6 +51,7 @@ class Worker(QRunnable):
     self.signals.finished.emit()
 
 threadpool = QThreadPool()
+tensorboard_thread = None
 
 """ ---- Model API: Preprocess Panel ---- """
 
@@ -82,6 +85,11 @@ def makeTrainingJob(pipeline, run_name, model_input, trainer_input):
     model_parser = ImageClassification.datamodule.DataModule.add_model_specific_args(model_parser)
     model_parser = ImageClassification.model.Model.add_model_specific_args(model_parser)
     model_dict = vars(model_parser.parse_args(model_input))
+
+  # Set Model-Specific Trainer Defaults:
+  if pipeline == "Image Classification":
+    if trainer_dict["max_epochs"] == None:
+      trainer_dict["max_epochs"] = 10
 
   # Init Trainer and output directories of Trainer
   log_directory = LOGS_DIRPATH + '/' + pipeline + '/' + run_name
@@ -120,11 +128,16 @@ def endTrainingJob(worker):
   output_directory = WEIGHTS_DIRPATH + '/' + worker.pipeline + '/' + worker.run_name
   shutil.copy2(hparams_file, output_directory)
 
-# TODO: Fix, not working yet
 def launchTensorboard():
-  tb = program.TensorBoard()
-  tb.configure(argv=[None, '--logdir', "model/logs"])
-  url = tb.launch()
+  tensorboard_thread = threading.Thread(target=runTb)
+  tensorboard_thread.start()
+  print("Loading Tensorboard...")
+
+def runTb():
+  # tb = program.TensorBoard()
+  # tb.configure(argv=[None, '--logdir', LOGS_DIRPATH])
+  # url = tb.launch()
+  os.system('tensorboard --logdir=' + LOGS_DIRPATH)
 
 """ ---- Model API: Inference Panel ---- """
 def predict(pipeline, data_dir, ckpt_dir):
