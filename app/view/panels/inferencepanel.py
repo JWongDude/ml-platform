@@ -1,10 +1,12 @@
 # ---- External Lib Imports ----
+from pathlib import Path
+from PyQt5.QtCore import QRect
 from PyQt5.QtWidgets import(
   QFrame, QSpacerItem, QSizePolicy, QHBoxLayout, QVBoxLayout)
 
 # ---- Local Lib Imports ----
 from app.view.widgets import (Dialog, Heading, HSeperationLine, ListWidget, 
-  Selector, Button, UploadWidget, Image, Slider, LineEditLayout, TextBox, ListWidgetSelector
+  Selector, Button, Spacer, UploadWidget, Image, Slider, LineEditLayout, TextBox, ListWidgetSelector
 )
 import app.view.api as view_api
 
@@ -57,16 +59,31 @@ class WeightPanel(QFrame):
 
 class InferenceDialog(Dialog):
   def __init__(self, image_path, label, slider_max):
-    super().__init__("Explorer")
+    super().__init__("Image Explorer")
     # Init Widgets
+    self.setFrameRect(QRect(0, 0, 750, 750))
+    # self.setMaximumSize(800, 800)
+    self.report_button = Button(signal_key="report_button")
+    self.report_button.setText("Generate Report")
     self.image = Image(image_path, update_key="inference_image")
+    self.image.setMaximumSize(800, 700)
     self.label = LineEditLayout(label_text="Label: ", edit_text=label, update_key="inference_label")
     self.label.line_edit.setReadOnly(True)
     self.slider = Slider(self, 0, slider_max, signal_key="toggle_inference", update_key="update_slider_length")
     self.slider.setFocus(True)
+    self.image_name = TextBox("")
+
+    # Header
+    header = QHBoxLayout()
+    header.addWidget(Heading("Image Explorer"))
+    header.addSpacerItem(Spacer(height=20))
+    header.addWidget(self.report_button)
 
     # Layout
     layout = QVBoxLayout()
+    layout.addLayout(header)
+
+    layout.addWidget(self.image_name)
     layout.addWidget(self.image)
     layout.addLayout(self.label)
     layout.addWidget(self.slider)
@@ -79,6 +96,8 @@ class InferenceDialog(Dialog):
     self.slider.setMaximum(length - 1) # Maximum value corresponds to maximum index!
 
   def updateDialog(self, image_path, label):
+    image_name = Path(image_path).stem
+    self.image_name.setText("Image Name: " + image_name)
     self.image.updateImage(image_path)
     self.label.updateEditText(label)
 

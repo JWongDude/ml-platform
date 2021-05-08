@@ -228,6 +228,7 @@ def initializeInference():
         slider_max = inference_parameters.getImageDirectoryLength()
         image_path = inference_parameters.image_directory[0]
         label = inference_parameters.predicted_labels[0]
+        image_name = inference_parameters.image_directory
         view_api.presentInferenceView(image_path, label, slider_max)
 
       # Otherwise, hashes are equal. Use previously computed predictions
@@ -240,11 +241,9 @@ def initializeInference():
 
       # Clear any error string
       view_api.displayInferenceErrorPresentation(error_string="")
-
-      # TODO: Add Index / Label Search Functionality for quick navigation. 
       
     except:
-      error_string = "Error: Please provide test data as plain image directory. "
+      error_string = "Error: Please provide test data as plain image directory."
       view_api.displayInferenceErrorPresentation(error_string=error_string)    
 
 """ ---- Control API: Inference Dialog ---- """

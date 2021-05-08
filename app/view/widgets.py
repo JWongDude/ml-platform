@@ -146,6 +146,8 @@ class Image(QLabel):
     super().__init__()
     pixmap = QPixmap(image_path)
     self.setPixmap(pixmap)
+    self.setScaledContents(True)
+    self.setSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
     if update_key is not None:
       view_api.add_to_update_map(self.updateImage, update_key)
 

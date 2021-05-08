@@ -31,14 +31,13 @@ if __name__ == '__main__':
     main()
 
 # TODO:
-# 1) Develop Logger, modifying the weights/logs will modify the other.
-# This is easily achieved by routing the signals to one another.
-
 # 2) Develop Explorer
-# - Enlarge Inference Images 
 
+# - Report Generation
+
+
+# ----
 # 2a) Cache on Image Directory AND Checkpoint path. B/c results is data + code! 
-# 2b) Make child windows, the extra windows are annoying :P
 # How? Try creating a separate view ui map for holding ref to windows. 
 # On a main window close event, set these references to null/do any application pickling business. 
 
