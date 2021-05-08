@@ -1,11 +1,6 @@
 from pathlib import Path
 import hashlib
-
-""" ---- Application Macros ----"""
-WEIGHTS_DIRPATH = "app/model/weights"
-PIPELINES_DIRPATH = "app/model/pipelines"
-LOGS_DIRPATH = "app/model/logs"
-IMAGE_CLASSIFICATION_CLASSMAP_FILENAME = "Class Map"
+from . import config
 
 def getNumberOfClasses(map_filepath):
   class_map = getClassMappingFromFile(map_filepath)
@@ -26,13 +21,12 @@ def getClassMappingFromDirectory(map_dirpath):
   # No error handling, whoops
   class_map = {}
   for path in Path(map_dirpath).iterdir():
-    if path.name == IMAGE_CLASSIFICATION_CLASSMAP_FILENAME + ".txt":
+    if path.name == config.IMAGE_CLASSIFICATION_CLASSMAP_FILENAME + ".txt":
       class_map = getClassMappingFromFile(str(path))
   return class_map
 
 def runNameUnique(run_name):
-  # Check for unique run name inside weight directory
-  for pipeline_path in Path(WEIGHTS_DIRPATH).iterdir():
+  for pipeline_path in Path("database").iterdir():
     for weights in pipeline_path.iterdir():
       if weights.name == run_name:
         return False
@@ -54,9 +48,6 @@ def md5_update_from_dir(directory, hash):
 # Hash Directory function, source: https://stackoverflow.com/questions/24937495/how-can-i-calculate-a-hash-for-a-filesystem-directory-using-python
 def md5_dir(directory):
     return md5_update_from_dir(directory, hashlib.md5()).hexdigest()
-
-def getSignalValue(signal):
-  return int(signal)
 
 # Unit Testing
 # if __name__ == '__main__':

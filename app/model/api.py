@@ -24,12 +24,7 @@ import app.model.pipelines.Image_Classification as ImageClassification
 # import lib provides means import through string arguments
 
 import app.utils as utils
-
-""" ---- Application Macros ----"""
-WEIGHTS_DIRPATH = "app/model/weights"
-PIPELINES_DIRPATH = "app/model/pipelines"
-LOGS_DIRPATH = "app/model/logs"
-IMAGE_CLASSIFICATION_CLASSMAP_FILENAME = "Class Map"
+from .. import config
 
 """ ---- Multithreading Objects ----- """
 class WorkerSignals(QObject):
@@ -58,7 +53,8 @@ tensorboard_thread = None
 
 
 """ ---- Model API: Model Panel ---- """
-def _set_ckpt_callback(output_directory): 
+def _set_ckpt_callback(pipeline, run_name):
+  output_directory = "database" + '/' + pipeline + '/' + run_name
   checkpoint_callback = ModelCheckpoint(
     dirpath = output_directory, 
     save_weights_only = True,
@@ -69,7 +65,7 @@ def _set_ckpt_callback(output_directory):
   return checkpoint_callback
 
 def _set_logger(pipeline, run_name):
-  logger = TensorBoardLogger(save_dir='model/logs/', name = pipeline, version = run_name) # Creates a logging directory w/ experiment name
+  logger = TensorBoardLogger(save_dir='database', name = pipeline, version = run_name) # Creates a logging directory w/ experiment name
   return logger
 
 def makeTrainingJob(pipeline, run_name, model_input, trainer_input):
@@ -93,18 +89,18 @@ def makeTrainingJob(pipeline, run_name, model_input, trainer_input):
       trainer_dict["max_epochs"] = 10
 
   # Init Trainer and output directories of Trainer
-  log_directory = LOGS_DIRPATH + '/' + pipeline + '/' + run_name
-  os.mkdir(log_directory)
-  trainer_dict['logger'] = _set_logger(pipeline, run_name)
-  output_directory = WEIGHTS_DIRPATH + '/' + pipeline + '/' + run_name
+  output_directory = "database" + '/' + pipeline + '/' + run_name
   os.mkdir(output_directory)
-  trainer_dict['callbacks'] = [_set_ckpt_callback(output_directory)]
+  trainer_dict['logger'] = _set_logger(pipeline, run_name)
+  trainer_dict['callbacks'] = [_set_ckpt_callback(pipeline, run_name)]
   trainer = Trainer(**trainer_dict)
 
   # Perform Pipeline-Specific Actions:
   if pipeline == "Image_Classification":  # Comes with Class Map 
+    # TODO: Derive Class Map as opposed to expecting user to provide.
+
     # Specify number of classes in model and copy the class map to the output directory
-    class_map_path = model_dict['input_dirpath'] + '/' + IMAGE_CLASSIFICATION_CLASSMAP_FILENAME + ".txt"
+    class_map_path = model_dict['input_dirpath'] + '/' + config.IMAGE_CLASSIFICATION_CLASSMAP_FILENAME + ".txt"
     model_dict['num_classes'] = utils.getNumberOfClasses(class_map_path)
     shutil.copy2(class_map_path, output_directory)
 
@@ -123,12 +119,6 @@ def startTrainingJob(worker):
   # Run Training
   threadpool.start(worker)
 
-def endTrainingJob(worker):
-  # Transfer Training Hparams to Output Directory
-  hparams_file = LOGS_DIRPATH + '/' + worker.pipeline + '/' + worker.run_name + '/' + "hparams.yaml"
-  output_directory = WEIGHTS_DIRPATH + '/' + worker.pipeline + '/' + worker.run_name
-  shutil.copy2(hparams_file, output_directory)
-
 def launchTensorboard():
   tensorboard_thread = threading.Thread(target=runTb)
   tensorboard_thread.daemon = True
@@ -139,7 +129,7 @@ def runTb():
   # tb = program.TensorBoard()
   # tb.configure(argv=[None, '--logdir', LOGS_DIRPATH])
   # url = tb.launch()
-  os.system('tensorboard --logdir=' + LOGS_DIRPATH)
+  os.system('tensorboard --logdir=' + 'database')
 
 """ ---- Model API: Inference Panel ---- """
 def predict(pipeline, data_dir, ckpt_dir):

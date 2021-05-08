@@ -30,20 +30,20 @@ def main():
 if __name__ == '__main__':
     main()
 
-
-# Def make logging view so that user is able to delete logs.
-# Is it a good idea to delete logs and weight together? Yes.
-# Is it a good idea to delete from two places? Yes. 
-# It's not bad at all. Make 
-
 # TODO:
 # 1) Develop Logger, modifying the weights/logs will modify the other.
 # This is easily achieved by routing the signals to one another.
 
-# 1a) Move the logs/weights to artifacts folder, I have more confidence I can figure out relative imports
-
 # 2) Develop Explorer
 # - Enlarge Inference Images 
+
+# 2a) Cache on Image Directory AND Checkpoint path. B/c results is data + code! 
+# 2b) Make child windows, the extra windows are annoying :P
+# How? Try creating a separate view ui map for holding ref to windows. 
+# On a main window close event, set these references to null/do any application pickling business. 
+
+# Also, create close events/custom close signals for Dialog widget.
+# This way, we can disable/enaable buttons depending if corresponding window is open or not for idemponcy. 
 
 # --------------------------------
 # 3) Make Object Detection Model

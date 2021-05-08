@@ -13,12 +13,7 @@ import app.model.api as model_api
 import app.utils as utils
 import app.view.api as view_api
 from app.view.api import ui_signals
-
-""" ---- Application Macros ----"""
-WEIGHTS_DIRPATH = "app/model/weights"
-PIPELINES_DIRPATH = "app/model/pipelines"
-LOGS_DIRPATH = "app/model/logs"
-IMAGE_CLASSIFICATION_CLASSMAP_FILENAME = "Class Map"
+from . import config
 
 """ ---- Application Data Objects ---- """
 class ModelParameters:
@@ -87,7 +82,7 @@ def recoverApplicationState():
     view_api.refreshInferenceWeightFeedback(feedback_string)
 
   # Also, parse weight directories to rended those to screen:
-  refreshInferenceWeights()
+  refreshDatabaseWeights()
 
 """ ---- Controller Setup ---- """
 def connect(signal, callback):
@@ -108,20 +103,17 @@ def connectMainWindowSignals():
   connect(ui_signals['run_name'], setRunName)
   connect(ui_signals['train_button'], initializeTraining) 
   connect(ui_signals['dash_button'], launchDashboard)
-  
-  # Add more connections for renameLog, deletingLog, and refreshLogs
-  # First create the dialog, then make the connections/methods. Methods are variations of existing methods and 
-  # connections wil cross connect. 
-  # Finally, test the log directory. 
-
+   
   # Inference Panel Signals
   connect(ui_signals['inference_dirpath'], setInferenceData)
   connect(ui_signals['weight_selection'], setInferenceWeights)
-  connect(ui_signals['weight_selection_rename'], renameInferenceWeights)
-  connect(ui_signals['weight_selection_deletion'], deleteInferenceWeights)
-  connect(ui_signals['refresh_weights'], refreshInferenceWeights)
   connect(ui_signals['inference_button'], initializeInference)
-  
+
+  # Database Widget Signals  
+  connect(ui_signals['weight_selection_rename'], renameDatabaseWeights)
+  connect(ui_signals['weight_selection_deletion'], deleteDatabaseWeights)
+  connect(ui_signals['refresh_weights'], refreshDatabaseWeights)
+
 def connectDialogSignals():
   # TODO: Complete connections / callbacks
   # Model Panel Dialog
@@ -185,8 +177,7 @@ def initializeTraining():
       progress_string = f"Running Training Job: {model_parameters.run_name}"
       worker.signals.started.connect(partial(lambda x: view_api.displayProgressPresentation(x), progress_string))
       worker.signals.started.connect(view_api.disableTrainButton)
-      end_string = f"Training Job Finished! Saved Weights: {model_parameters.run_name}"
-      worker.signals.finished.connect(partial(lambda x: model_api.endTrainingJob(x), worker))
+      end_string = f"Training Job Finished! Saving Trained Model: {model_parameters.run_name}"
       worker.signals.finished.connect(partial(lambda x: view_api.displayProgressPresentation(x), end_string))
       worker.signals.finished.connect(view_api.enableTrainButton)
 
@@ -212,41 +203,10 @@ def setInferenceData(dirpath):
 def setInferenceWeights(signal):
   name, index = signal 
   inference_parameters.pipeline = name
-  weight_directory = (Path(WEIGHTS_DIRPATH) / inference_parameters.pipeline).iterdir()
+  weight_directory = (Path("database") / inference_parameters.pipeline).iterdir()
   pipeline_weights = [ckpt_path for ckpt_path in weight_directory]
   inference_parameters.ckpt_path = pipeline_weights[index] 
   # print(inference_parameters.ckpt_path)
-
-# Let's just hope user does not rename to existing filename
-def renameInferenceWeights(signal):
-  name, index, updated_name = signal 
-  if index != -1:
-    weight_directory = list((Path(WEIGHTS_DIRPATH) / name).iterdir())
-    weight_path = weight_directory[index]
-    updated_path = Path(weight_path.parent, f"{updated_name}") 
-    # Check if we are renaming the active weights
-    if weight_path == inference_parameters.ckpt_path:
-      inference_parameters.ckpt_path = updated_path
-    weight_path.rename(updated_path)
-    # print("Updated State: ", inference_parameters.ckpt_path)
-
-def deleteInferenceWeights(signal):
-  name, index, deleted_name = signal
-  weight_directory = list((Path(WEIGHTS_DIRPATH) / name).iterdir())
-  weight_path = weight_directory[index]
-  # Check if we are deleting the active weights
-  if weight_path == inference_parameters:
-    inference_parameters.ckpt_path = None
-  shutil.rmtree(weight_path)
-  # print("Updated State: ", inference_parameters.ckpt_path)
-
-# Triggered by Refresh Button, also called on application initialization
-def refreshInferenceWeights():
-  # Pass along list of strings to view
-  for dirpath in Path(WEIGHTS_DIRPATH).iterdir(): 
-    pipeline = dirpath.name
-    weight_names = [path.stem for path in Path(dirpath).iterdir()]
-    view_api.refreshInferenceWeights(pipeline, weight_names)
 
 # Triggered by "Inference" Button
 def initializeInference():
@@ -294,3 +254,35 @@ def toggleInference(index):
   image_path = inference_parameters.image_directory[index]
   label = inference_parameters.predicted_labels[index]
   view_api.updateInferenceView(image_path, label)
+
+""" ---- Control API: Database Utils ---- """
+# Let's just hope user does not rename to existing filename
+def renameDatabaseWeights(signal):
+  name, index, updated_name = signal 
+  if index != -1:
+    weight_directory = list((Path("database") / name).iterdir())
+    weight_path = weight_directory[index]
+    updated_path = Path(weight_path.parent, f"{updated_name}") 
+    # Check if we are renaming the active weights
+    if weight_path == inference_parameters.ckpt_path:
+      inference_parameters.ckpt_path = updated_path
+    weight_path.rename(updated_path)
+    # print("Updated State: ", inference_parameters.ckpt_path)
+
+def deleteDatabaseWeights(signal):
+  name, index, deleted_name = signal
+  weight_directory = list((Path("database") / name).iterdir())
+  weight_path = weight_directory[index]
+  # Check if we are deleting the active weights
+  if weight_path == inference_parameters:
+    inference_parameters.ckpt_path = None
+  shutil.rmtree(weight_path)
+  # print("Updated State: ", inference_parameters.ckpt_path)
+
+# Triggered by Refresh Button, also called on application initialization
+def refreshDatabaseWeights():
+  # Pass along list of strings to view
+  for dirpath in Path("database").iterdir(): 
+    pipeline = dirpath.name
+    weight_names = [path.stem for path in Path(dirpath).iterdir()]
+    view_api.refreshDatabaseWeights(pipeline, weight_names)

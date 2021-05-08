@@ -40,15 +40,13 @@ def enableTrainButton():
   ui_updates['update_train_button']['enable']()
 
 """ ---- View API: Inference Panel ---- """
-def refreshInferenceWeights(pipeline, weight_names):
-  ui_updates['update_weight_list'](pipeline, weight_names)
-
 def refreshInferenceWeightFeedback(feedback_string):
   ui_updates['update_weight_panel_feedback'](feedback_string)
 
 def displayInferenceErrorPresentation(error_string):
   ui_updates['update_inference_feedback'](error_string)
 
+""" ---- View API: Inference Explorer ---- """
 def presentInferenceView(image_path, label, slider_max):
   ui_updates['launch_inference_dialog'](image_path, label, slider_max)
   
@@ -57,3 +55,7 @@ def updateInferenceView(image_path, label):
 
 def updateSliderLength(length):
   ui_updates['update_slider_length'](length)
+
+  """ ---- View API: Database View ---- """
+def refreshDatabaseWeights(pipeline, weight_names):
+  ui_updates['update_weight_list'](pipeline, weight_names)
