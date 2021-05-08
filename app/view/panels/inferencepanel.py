@@ -1,8 +1,8 @@
 # ---- External Lib Imports ----
 from pathlib import Path
-from PyQt5.QtCore import QRect
+from PyQt5.QtCore import QRect, Qt
 from PyQt5.QtWidgets import(
-  QFrame, QSpacerItem, QSizePolicy, QHBoxLayout, QVBoxLayout)
+  QFrame, QScrollArea, QSpacerItem, QSizePolicy, QHBoxLayout, QVBoxLayout, QWidget)
 
 # ---- Local Lib Imports ----
 from app.view.widgets import (Dialog, Heading, HSeperationLine, ListWidget, 
@@ -62,16 +62,26 @@ class InferenceDialog(Dialog):
     super().__init__("Image Explorer")
     # Init Widgets
     self.setFrameRect(QRect(0, 0, 750, 750))
-    # self.setMaximumSize(800, 800)
     self.report_button = Button(signal_key="report_button")
     self.report_button.setText("Generate Report")
     self.image = Image(image_path, update_key="inference_image")
-    self.image.setMaximumSize(800, 700)
     self.label = LineEditLayout(label_text="Label: ", edit_text=label, update_key="inference_label")
     self.label.line_edit.setReadOnly(True)
     self.slider = Slider(self, 0, slider_max, signal_key="toggle_inference", update_key="update_slider_length")
     self.slider.setFocus(True)
     self.image_name = TextBox("")
+
+    # Obnoxious Scroll Bar Code
+    self.scroll_area = QScrollArea()
+    self.widget = QWidget()
+    self.widget.setMaximumSize(1400, 1400)
+    self.image_layout = QVBoxLayout()
+    self.image_layout.addWidget(self.image)
+    self.widget.setLayout(self.image_layout)
+    self.scroll_area.setVerticalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
+    self.scroll_area.setHorizontalScrollBarPolicy(Qt.ScrollBarAlwaysOn)
+    self.scroll_area.setWidgetResizable(True)
+    self.scroll_area.setWidget(self.widget)
 
     # Header
     header = QHBoxLayout()
@@ -82,9 +92,9 @@ class InferenceDialog(Dialog):
     # Layout
     layout = QVBoxLayout()
     layout.addLayout(header)
-
     layout.addWidget(self.image_name)
-    layout.addWidget(self.image)
+    # layout.addWidget(self.image)
+    layout.addWidget(self.scroll_area)
     layout.addLayout(self.label)
     layout.addWidget(self.slider)
     self.setLayout(layout)
