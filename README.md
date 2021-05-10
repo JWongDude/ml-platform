@@ -1,12 +1,12 @@
 # ml-platform 
-Low-Code ML-Platform for Computer Vision.  
+Low-Code ML-Platform for Computer Vision in collaboration with Boeing.  
 
 ## Motivation 
-Platform automates model training of image classification and object detection models in end-to-end manner.
-simply provide the training data and platform handles the rest!
+This project automates model training of image classification and object detection models in an end-to-end manner. <br>
+Simply provide the training data and platform handles the rest!
 
 ## Installation 
-- Windows: 
+### Windows: 
 Install [Python](https://www.python.org/downloads/), [Git](https://git-scm.com/downloads) 
 
 Clone Repository and Setup Application Environment: 
@@ -21,5 +21,7 @@ python app.py
 ```
 
 ## Usage
-- Windows:
-Navigate to Project Directory `cd <path/to/project/directory>`, activate virtualenv if needed `.\venv\Scripts\activate`, and run entrypoint `python app.py`.
+### Windows:
+Navigate to Project Directory `cd <path/to/project/directory>`, <br>
+activate virtualenv if needed `.\venv\Scripts\activate`, <br>
+and run entrypoint `python app.py`.<br>
