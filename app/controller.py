@@ -4,6 +4,8 @@
 
 # ---- Standard Lib Imports ----
 from pathlib import Path
+import os
+import yaml
 import shutil
 from functools import partial
 import shlex
@@ -13,7 +15,6 @@ import app.model.api as model_api
 import app.utils as utils
 import app.view.api as view_api
 from app.view.api import ui_signals
-from . import config
 
 """ ---- Application Data Objects ---- """
 class ModelParameters:
@@ -77,9 +78,9 @@ def recoverApplicationState():
   
   # TODO: Autosave applicaiton state
   # Quality of Life Inference View Startup Feedback 
-  if inference_parameters.ckpt_path == None:
-    feedback_string = "No models trained yet! Visit Model Training to train your first model."
-    view_api.refreshInferenceWeightFeedback(feedback_string)
+  # if inference_parameters.ckpt_path == None:
+  #   feedback_string = "No models trained yet! Visit Model Training to train your first model."
+  #   view_api.refreshInferenceWeightFeedback(feedback_string)
 
   # Also, parse weight directories to rended those to screen:
   refreshDatabaseWeights()
@@ -108,6 +109,7 @@ def connectMainWindowSignals():
   connect(ui_signals['inference_dirpath'], setInferenceData)
   connect(ui_signals['weight_selection'], setInferenceWeights)
   connect(ui_signals['inference_button'], initializeInference)
+  connect(ui_signals['report_button'], generateReport)
 
   # Database Widget Signals  
   connect(ui_signals['weight_selection_rename'], renameDatabaseWeights)
@@ -228,8 +230,10 @@ def initializeInference():
         slider_max = inference_parameters.getImageDirectoryLength()
         image_path = inference_parameters.image_directory[0]
         label = inference_parameters.predicted_labels[0]
-        image_name = inference_parameters.image_directory
         view_api.presentInferenceView(image_path, label, slider_max)
+
+        # Reset the Report Button Feedback 
+        view_api.clearReportButtonFeedback()
 
       # Otherwise, hashes are equal. Use previously computed predictions
       else:
@@ -241,7 +245,8 @@ def initializeInference():
 
       # Clear any error string
       view_api.displayInferenceErrorPresentation(error_string="")
-      
+      print("Loading Image Explorer...")
+
     except:
       error_string = "Error: Please provide test data as plain image directory."
       view_api.displayInferenceErrorPresentation(error_string=error_string)    
@@ -285,3 +290,67 @@ def refreshDatabaseWeights():
     pipeline = dirpath.name
     weight_names = [path.stem for path in Path(dirpath).iterdir()]
     view_api.refreshDatabaseWeights(pipeline, weight_names)
+
+
+""" ---- Control API: Output Utils ---- """
+"""
+Report Format:
+---- <Experiment Name>_Report.txt ----
+Experiment Name: <Experiment Name>
+Model Type: <Model Type>
+
+Model Training: 
+Training Hyperparameters: 
+  (List hyperparameters from yaml file)
+Training Metrics: 
+  See dashboard, please print visualizations from browser
+
+Model Prediction: 
+Image Directory: <Image Directory Name>
+<image name>  <prediction>
+<image name>  <prediction>
+<image name>  <prediction>
+...
+"""
+def generateReport():
+  # Get the location of downloads folder
+  downloads_path = os.path.join(os.getenv('USERPROFILE'), 'Downloads')
+  
+  # Get valid file name for report
+  counter = 0
+  file_name = f'{model_parameters.run_name}_Report.txt'
+  file_path = os.path.join(downloads_path, file_name)
+  while os.path.isfile(file_path):
+    counter += 1
+    file_name = f'{model_parameters.run_name}_Report ({counter}).txt'
+    file_path = os.path.join(downloads_path, file_name)
+
+  # Access Model Info from Current Experiment
+  with open(Path(inference_parameters.ckpt_path) / 'hparams.yaml') as file:
+    params = yaml.load(file, Loader=yaml.FullLoader)
+  # params is a map of yaml entries
+  input_dirpath = params.pop('input_dirpath', None)
+
+  # Write report
+  with open(file_path, 'w') as f:
+    # Heading
+    f.write(f"Experiment Name: {model_parameters.run_name} \n")
+    f.write(f"Model Type: {model_parameters.pipeline} \n")
+    f.write("\n")
+
+    # Training Information
+    f.write("Model Training Parameters: \n")
+    f.write(f"Training Directory: {input_dirpath} \n")
+    for param, value in params.items():
+      f.write(f"{param}: " + str(value) + "\n")
+    f.write("Please reference model training dashboard for training metrics. \n")
+    f.write("\n")
+
+    # Prediction Information
+    f.write("Model Predictions: \n")
+    f.write(f"Image Directory: {inference_parameters.data_path} \n")
+    if inference_parameters.pipeline == "Image_Classification":
+      
+      for image, label in zip(inference_parameters.image_directory,
+                              inference_parameters.predicted_labels):
+        f.write(f"{Path(image).stem}   {label} \n")

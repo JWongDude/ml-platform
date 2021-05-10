@@ -56,6 +56,9 @@ def updateInferenceView(image_path, label):
 def updateSliderLength(length):
   ui_updates['update_slider_length'](length)
 
+def clearReportButtonFeedback():
+  ui_updates["report_button_feedback"]("") 
+  
   """ ---- View API: Database View ---- """
 def refreshDatabaseWeights(pipeline, weight_names):
   ui_updates['update_weight_list'](pipeline, weight_names)

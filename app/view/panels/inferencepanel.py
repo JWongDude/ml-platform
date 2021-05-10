@@ -61,15 +61,21 @@ class InferenceDialog(Dialog):
   def __init__(self, image_path, label, slider_max):
     super().__init__("Image Explorer")
     # Init Widgets
-    self.setFrameRect(QRect(0, 0, 750, 750))
+    self.setFrameRect(QRect(0, 0, 1000, 1000))
     self.report_button = Button(signal_key="report_button")
     self.report_button.setText("Generate Report")
+    self.image_name = TextBox("")
+    self.feedback = TextBox("", update_key="report_button_feedback")
+    self.feedback.setAlignment(Qt.AlignRight | Qt.AlignVCenter)
     self.image = Image(image_path, update_key="inference_image")
-    self.label = LineEditLayout(label_text="Label: ", edit_text=label, update_key="inference_label")
+    self.label = LineEditLayout(label_text="Predicted Label: ", edit_text=label, update_key="inference_label")
     self.label.line_edit.setReadOnly(True)
     self.slider = Slider(self, 0, slider_max, signal_key="toggle_inference", update_key="update_slider_length")
     self.slider.setFocus(True)
-    self.image_name = TextBox("")
+
+    # Report Feedback 
+    feedback_string = "Report Generated! Please Check Downloads Folder."
+    self.report_button.clicked.connect(lambda: self.feedback.setText(feedback_string))
 
     # Obnoxious Scroll Bar Code
     self.scroll_area = QScrollArea()
@@ -89,11 +95,16 @@ class InferenceDialog(Dialog):
     header.addSpacerItem(Spacer(height=20))
     header.addWidget(self.report_button)
 
+    # Subheader
+    subheader = QHBoxLayout()
+    subheader.addWidget(self.image_name)
+    subheader.addSpacerItem(Spacer(height=20))
+    subheader.addWidget(self.feedback)
+
     # Layout
     layout = QVBoxLayout()
     layout.addLayout(header)
-    layout.addWidget(self.image_name)
-    # layout.addWidget(self.image)
+    layout.addLayout(subheader)
     layout.addWidget(self.scroll_area)
     layout.addLayout(self.label)
     layout.addWidget(self.slider)
@@ -138,7 +149,7 @@ class InferenceLaunchpad(QFrame):
   # Launchpad Method
   def initAndlaunchDialog(self, image_path, label, slider_max): 
     self.dialog.updateDialog(image_path, label)
-    self.dialog.setSliderLength(slider_max)
+    self.dialog.setSliderLength(slider_max) 
     self.dialog.run_dialog()
 
 class InferenceView(QFrame):
