@@ -11,11 +11,9 @@ Install [Python](https://www.python.org/downloads/), [Git](https://git-scm.com/d
 
 Clone Repository and Setup Application Environment: 
 ```bash
-pip install virtualenv
 git clone https://github.com/JWongDude/ml-platform.git
-
-virtualenv --python  #add python path
-.\venv\Scripts\activate
+python -m venv .venv
+.\.venv\Scripts\activate
 pip install -r requirements.txt
 python app.py 
 ```
