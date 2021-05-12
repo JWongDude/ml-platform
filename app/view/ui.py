@@ -4,7 +4,7 @@ from functools import partial
 # ---- External Lib Imports ----
 # Main Window Widgets
 from PyQt5.QtWidgets import(
-  QMainWindow, QStackedWidget, QToolBar, QAction)
+  QMainWindow, QStackedWidget, QToolBar, QAction, QSizePolicy)
 from PyQt5.QtCore import (Qt, QSize)
 from PyQt5.QtGui import (QIcon)
 
@@ -20,7 +20,6 @@ class PlatformUi(QMainWindow):
   
     # Initialize Application View
     self.setWindowTitle('Boeing Computer Vision Platform')
-    self.setFixedSize(800, 900)
     self.Stack = QStackedWidget(self)
     self.panel1 = DataPrepView()
     self.panel2 = ModelView()
@@ -32,6 +31,12 @@ class PlatformUi(QMainWindow):
 
     # Setup Application Navigation
     self._createNavigationBar()
+
+    # Setup Resizable Window
+    sizePolicy = QSizePolicy(QSizePolicy.Expanding, QSizePolicy.Expanding)
+    sizePolicy.setHorizontalStretch(0)
+    sizePolicy.setVerticalStretch(0)
+    self.setSizePolicy(sizePolicy)
 
   def _createNavigationBar(self):
     # Load in button icons
