@@ -127,7 +127,7 @@ class InferenceLaunchpad(QFrame):
     super().__init__()
     # Init Launchpad Widgets
     inference_button = Button(signal_key="inference_button")
-    inference_button.setText("Open Explorer")
+    inference_button.setText("Open Image Explorer")
     inference_feedback = TextBox("", update_key="update_inference_feedback")
 
     # Layout

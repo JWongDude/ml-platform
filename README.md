@@ -34,3 +34,13 @@ and retrieve the pytorch version compatible with your hardware. Install this pyt
 # Ex, for CUDA 10.2, run the following: 
 pip3 install torch==1.8.1+cu102 torchvision==0.9.1+cu102 torchaudio===0.8.1 -f https://download.pytorch.org/whl/torch_stable.html
 ```
+
+## Platform Tour
+### Model Training Panel 
+![Optional Text](images/ML Platform Model Panel.png)
+
+### Model Prediction Panel 
+![Optional Text](images/ML Platform Prediction Panel.png)
+
+### Image Explorer
+![Optional Text](images/ML Platform Image Explorer.png)
