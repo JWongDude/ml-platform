@@ -13,7 +13,10 @@ Clone Repository and Setup Application Environment:
 ```bash
 git clone https://github.com/JWongDude/ml-platform.git
 python -m venv .venv
-.\.venv\Scripts\activate
+
+.venv/Scripts/Activate.ps1  # Powershell 
+source .venv/Scripts/activate  # Shell
+
 pip install -r requirements.txt
 python app.py 
 ```
