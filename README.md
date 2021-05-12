@@ -24,5 +24,13 @@ python app.py
 ## Usage
 ### Windows:
 Navigate to Project Directory `cd <path/to/project/directory>`, <br>
-activate virtualenv if needed `.\venv\Scripts\activate`, <br>
+activate virtualenv if needed `./venv/Scripts/activate`, <br>
 and run entrypoint `python app.py`.<br>
+
+If your computer has a GPU, please head to the official [Pytorch](https://pytorch.org/get-started/locally/) website 
+and retrieve the pytorch version compatible with your hardware. Install this pytorch into your virtual environment.
+
+```bash 
+# Ex, for CUDA 10.2, run the following: 
+pip3 install torch==1.8.1+cu102 torchvision==0.9.1+cu102 torchaudio===0.8.1 -f https://download.pytorch.org/whl/torch_stable.html
+```
