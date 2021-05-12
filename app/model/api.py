@@ -84,7 +84,7 @@ def makeTrainingJob(pipeline, run_name, model_input, trainer_input):
     model_dict = vars(model_parser.parse_args(model_input))
 
   # Set Model-Specific Trainer Defaults:
-  if pipeline == "Image Classification":
+  if pipeline == "Image_Classification":
     if trainer_dict["max_epochs"] == None:
       trainer_dict["max_epochs"] = 10
 
