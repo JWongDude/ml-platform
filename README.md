@@ -37,10 +37,13 @@ pip3 install torch==1.8.1+cu102 torchvision==0.9.1+cu102 torchaudio===0.8.1 -f h
 
 ## Platform Tour
 ### Model Training Panel 
+
 ![Optional Text](images/ML Platform Model Panel.PNG)
 
 ### Model Prediction Panel 
+
 ![Optional Text](images/ML Platform Prediction Panel.PNG)
 
 ### Image Explorer
+
 ![Optional Text](images/ML Platform Image Explorer.PNG)
