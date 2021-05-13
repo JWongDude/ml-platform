@@ -9,7 +9,7 @@ Simply provide the training data and platform handles the rest!
 ### Windows: 
 Install [Python](https://www.python.org/downloads/), [Git](https://git-scm.com/downloads) 
 
-Tested to be Functional on Python version 3.8.8
+Tested to be Functional on **Python version 3.8.8**
 
 Clone Repository and Setup Application Environment: 
 ```bash
@@ -52,6 +52,7 @@ Attempt to train and follow the error message if it appears.)
 
 With those instructions completed, you should have the platform up-and-running. 
 
+Sharing a Model: <br>
 If you would like to share a trained model to another person using the platform, this is easily done by exporting your experiment into the reciever's database folder. For example, 
 say I have a trained an image classification model called "Experiment 1". You will find a new folder inside the Image_Classification folder called "Experiment 1", which contains all the model's details. Send this folder to the recipient and place in the recipient's Image_Classification folder to complete sharing. 
 
