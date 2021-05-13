@@ -33,13 +33,10 @@ if __name__ == '__main__':
 # TODO:
 # Weekend Freetime: 
 # Make Dakota's Panel -- should be 30 min - 1hr
-# Cache on Image Directory AND Checkpoint path. B/c results is data + code! 
 
 # --------------------------------
 # 3) Make Object Detection Model
 # 3a) Checkout CVAT for their output formats
-# 3b) Work with CVAT outputs, change Image Classification to work with simple image directory, and we derive the class map.
+# 3b) Work with CVAT outputs, change Image Classification to work with simple image directory.
 # 3c) Figure out *what* to log and *what* predictions to pass on to inference panel
 # I anticipate visualizing bounding boxes / segmentation masks might be unique custom work
-
-# Cannot add blank directory to git-- checkout the details. 

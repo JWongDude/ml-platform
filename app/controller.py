@@ -3,6 +3,7 @@
 # Processes Events, runs model, and dispatches information to the view.
 
 # ---- Standard Lib Imports ----
+import traceback
 from pathlib import Path
 import os
 import yaml
@@ -45,7 +46,7 @@ class InferenceParameters:
     self.pipeline = "Image_Classification" 
     self.ckpt_path = None
     # Inference Output
-    self.dir_hash = None  # For caching vs. no caching 
+    self.infer_hash = None  # For caching vs. no caching 
     self.image_directory = []   # Directory of Image Path Objects
     self.predicted_labels = []  # Directory of Labels
     # Inference Dialog
@@ -186,10 +187,11 @@ def initializeTraining():
       # Start the Job
       model_api.startTrainingJob(worker)
 
-    except:
+    except Exception:
       error_string = "Error: Please provide training data in expected format " + \
       "and provide valid hyperparameters."
       view_api.displayTrainingErrorPresentation(error_string=error_string)
+      print(traceback.format_exc())
 
 def launchDashboard():
   model_api.launchTensorboard()
@@ -219,9 +221,11 @@ def initializeInference():
     try: 
       # Calculate Directory hash for caching
       md5_hash = utils.md5_dir(inference_parameters.data_path)
+      infer_hash = md5_hash + str(hash(inference_parameters.pipeline))
+
       # Set hash and predictions for first input directory and any new/modified input directories
-      if inference_parameters.dir_hash is None or inference_parameters.dir_hash != md5_hash:  
-        inference_parameters.dir_hash = md5_hash
+      if inference_parameters.infer_hash is None or inference_parameters.infer_hash != infer_hash:  
+        inference_parameters.infer_hash = infer_hash
         setInferenceData(inference_parameters.data_path)
         predictions = model_api.predict(inference_parameters.pipeline, inference_parameters.data_path, inference_parameters.ckpt_path)
         inference_parameters.predicted_labels = predictions['labels']
@@ -247,9 +251,10 @@ def initializeInference():
       view_api.displayInferenceErrorPresentation(error_string="")
       print("Loading Image Explorer...")
 
-    except:
+    except Exception:
       error_string = "Error: Please provide test data as plain image directory."
-      view_api.displayInferenceErrorPresentation(error_string=error_string)    
+      view_api.displayInferenceErrorPresentation(error_string=error_string)
+      print(traceback.format_exc())    
 
 """ ---- Control API: Inference Dialog ---- """
 # Triggered by Slider 

@@ -47,7 +47,7 @@ Features include:
 - Tensorboard Logging 
 
 ### Model Prediction Panel 
-![ML Platform Prediction Panel](https://user-images.githubusercontent.com/54962990/118059500-86c36600-b345-11eb-8a02-4dd68e03b189.PNG)
+![ML Platform Prediction Panel](https://user-images.githubusercontent.com/54962990/118061178-4665e700-b349-11eb-933f-aae6b5f65e58.PNG)
 
 Features include:
 - Point and Click Selection of Trained Models
