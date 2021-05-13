@@ -9,6 +9,8 @@ Simply provide the training data and platform handles the rest!
 ### Windows: 
 Install [Python](https://www.python.org/downloads/), [Git](https://git-scm.com/downloads) 
 
+Tested to be Functional on Python version 3.8.8
+
 Clone Repository and Setup Application Environment: 
 ```bash
 git clone https://github.com/JWongDude/ml-platform.git
@@ -20,6 +22,16 @@ source .venv/Scripts/activate  # Shell
 pip install -r requirements.txt
 python app.py 
 ```
+
+As the last installation step, please make an empty directory called "database" in the same place as app.py. Please make the folder with the following subdirectorty structure: 
+
+```bash
+- database
+    |-Image_Classification
+    |-Object_Detection
+    |-Object_Segmentation
+```
+All outputs (trained models, metrics) of the platform will be stored inside of this folder. You will need the database folder to save the model outputs. 
 
 ## Usage
 ### Windows:
@@ -35,6 +47,13 @@ pip3 install torch==1.8.1+cu102 torchvision==0.9.1+cu102 torchaudio===0.8.1 -f h
 
 ```
 If necessary, update the GPU Driver at [Nvidia](https://www.nvidia.com/Download/index.aspx)
+(The platform will not let you train on an old GPU Driver with an error message to this link.
+Attempt to train and follow the error message if it appears.) 
+
+With those instructions completed, you should have the platform up-and-running. 
+
+If you would like to share a trained model to another person using the platform, this is easily done by exporting your experiment into the reciever's database folder. For example, 
+say I have a trained an image classification model called "Experiment 1". You will find a new folder inside the Image_Classification folder called "Experiment 1", which contains all the model's details. Send this folder to the recipient and place in the recipient's Image_Classification folder to complete sharing. 
 
 ## Platform Tour
 ### Model Training Panel 
