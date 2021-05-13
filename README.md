@@ -27,23 +27,39 @@ Navigate to Project Directory `cd <path/to/project/directory>`, <br>
 activate virtualenv if needed `./venv/Scripts/activate`, <br>
 and run entrypoint `python app.py`.<br>
 
-If your computer has a GPU, please head to the official [Pytorch](https://pytorch.org/get-started/locally/) website 
-and retrieve the pytorch version compatible with your hardware. Install this pytorch into your virtual environment.
+If your computer has a GPU, please head to the official [Pytorch](https://pytorch.org/get-started/locally/) website and retrieve the pytorch version compatible with your hardware. Install this pytorch into your virtual environment.
 
 ```bash 
 # Ex, for CUDA 10.2, run the following: 
 pip3 install torch==1.8.1+cu102 torchvision==0.9.1+cu102 torchaudio===0.8.1 -f https://download.pytorch.org/whl/torch_stable.html
+
 ```
+If necessary, update the GPU Driver at [Nvidia](https://www.nvidia.com/Download/index.aspx)
 
 ## Platform Tour
 ### Model Training Panel 
+![ML Platform Model Panel](https://user-images.githubusercontent.com/54962990/118059403-511e7d00-b345-11eb-9fe5-468c96373097.PNG)
 
-![Optional Text](images/ML Platform Model Panel.PNG)
+Features include: 
+- Selection between Image Classification, Object Detection, and Object Segmentation. 
+- Hyperparameter Configuration
+- GPU Support 
+- Tensorboard Logging 
 
 ### Model Prediction Panel 
+![ML Platform Prediction Panel](https://user-images.githubusercontent.com/54962990/118059500-86c36600-b345-11eb-8a02-4dd68e03b189.PNG)
 
-![Optional Text](images/ML Platform Prediction Panel.PNG)
+Features include:
+- Point and Click Selection of Trained Models
+- Rename and Delete Functionality
+- Image Explorer for Visualization of Model Results.
 
 ### Image Explorer
+![ML Platform Image Explorer](https://user-images.githubusercontent.com/54962990/118059503-888d2980-b345-11eb-98ea-5f52827fead5.PNG)
 
-![Optional Text](images/ML Platform Image Explorer.PNG)
+Features include: 
+- Resizeable window, for framing any size input
+- Report Generation containing information of trained model metrics and model predictions. 
+
+### Tutorial Video
+ ----- Coming Soon -----

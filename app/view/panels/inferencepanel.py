@@ -80,7 +80,6 @@ class InferenceDialog(Dialog):
     # Obnoxious Scroll Bar Code
     self.scroll_area = QScrollArea()
     self.widget = QWidget()
-    self.widget.setMaximumSize(1400, 1400)
     self.image_layout = QVBoxLayout()
     self.image_layout.addWidget(self.image)
     self.widget.setLayout(self.image_layout)
