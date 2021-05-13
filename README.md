@@ -52,7 +52,7 @@ Attempt to train and follow the error message if it appears.)
 With those instructions completed, you should have the platform up-and-running. 
 
 **Training a Model**: <br>
-- Image Classification: 
+- Image Classification: <br>
 The training image directory expected format is organized as the following:
 ```bash
 <your directory name>
@@ -85,7 +85,8 @@ flamingo: 2
 It does not matter how you order the classes. The underlying nueral network produces an integer output, so this file provides a translation of what each integer means. 
 
 **Sharing a Model**: <br>
-If you would like to share a trained model to another person using the platform, this is easily done by exporting your experiment into the reciever's database folder. For example, 
+
+If you would like to share a trained model to another person using the platform, this is simply done by exporting your experiment into the reciever's database folder. For example, 
 say I have a trained an image classification model called "Experiment 1". You will find a new folder inside the Image_Classification folder called "Experiment 1", which contains all the model's details. Send this folder to the recipient and place in the recipient's Image_Classification folder to complete sharing. 
 
 ## Platform Tour
